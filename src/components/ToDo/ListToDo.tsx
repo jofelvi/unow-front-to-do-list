@@ -1,19 +1,32 @@
 import React, {useState} from 'react';
 import {Button, Col, Divider, message, Popconfirm, Row, Space, Table} from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, DownloadOutlined, EditOutlined,  DeleteOutlined, } from "@ant-design/icons";
+import {
+    CheckCircleOutlined,
+    CheckOutlined,
+    ClockCircleOutlined,
+    CloseCircleOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    FileAddOutlined,
+    FolderViewOutlined,
+    InfoCircleOutlined,
+    UnorderedListOutlined,
+} from "@ant-design/icons";
 import type {SizeType} from 'antd/es/config-provider/SizeContext';
 import type {ColumnsType} from 'antd/es/table';
 import type {TableRowSelection} from 'antd/es/table/interface';
+import {useNavigate} from "react-router-dom";
 
 interface DataType {
     key: React.Key;
     task: string;
     description: string;
     category: string;
-    when: string;
+    when: Date;
     priority: string;
     status: string;
     children?: DataType[];
+    id: string
 }
 
 const dataSource: DataType[] = [
@@ -22,27 +35,30 @@ const dataSource: DataType[] = [
         task: 'Task 1',
         description: 'Description 1',
         category: 'Category 1',
-        when: '2023-07-25',
+        when: new Date('2023-07-25'),
         priority: 'High',
         status: 'Pending',
+        id: "52332"
     },
     {
         key: '2',
         task: 'Task 2',
         description: 'Description 2',
         category: 'Category 2',
-        when: '2023-07-26',
+        when: new Date('2023-07-25'),
         priority: 'Medium',
         status: 'In Progress',
+        id: "5222"
     },
     {
         key: '3',
         task: 'Task 2',
         description: 'Description 2',
         category: 'Category 2',
-        when: '2023-07-26',
+        when: new Date('2023-07-25'),
         priority: 'Medium',
         status: 'Done',
+        id: "5212"
     },
 ];
 
@@ -55,13 +71,18 @@ const statusIconMap: { [key: string]: React.ReactNode } = {
 const ListToDo = () => {
     const [size, setSize] = useState<SizeType>('large');
     const [checkStrictly, setCheckStrictly] = useState(false);
+    const navigate = useNavigate();
 
-    const handleEdit = (record: DataType) => {
-        console.log('Edit Task:', record);
+    const handleEditTask = (record: DataType) => {
+        navigate(`update-To-do/${record.id}`)
     };
 
-    // Función para manejar la eliminación de una tarea
-    const handleDelete = (key: React.Key) => {
+    const handleShowTask = (record: DataType) => {
+        console.log('handleShowTask:', record);
+        navigate(`details-To-do/${record.id}`)
+    };
+
+    const handleDeleteTask = (key: React.Key) => {
         console.log('Delete Task:', key);
         message.success('Task deleted successfully');
     };
@@ -77,6 +98,7 @@ const ListToDo = () => {
             console.log(selected, selectedRows, changeRows);
         },
     };
+
     const columns: ColumnsType<DataType> = [
         {
             title: 'Task',
@@ -114,16 +136,17 @@ const ListToDo = () => {
             key: 'actions',
             render: (_, record) => (
                 <Space size="middle">
-                    <EditOutlined style={{ color: 'blue' }} onClick={() => handleEdit(record)} />
+                    <EditOutlined style={{ color: 'blue' }} onClick={() => handleEditTask(record)} />
                     <Popconfirm
                         title="Are you sure to delete this task?"
-                        onConfirm={() => handleDelete(record.key)}
+                        onConfirm={() => handleDeleteTask(record.key)}
                         onCancel={() => message.error('Cancelled')}
                         okText="Yes"
                         cancelText="No"
                     >
                         <DeleteOutlined style={{ color: 'red' }} />
                     </Popconfirm>
+                    <FolderViewOutlined style={{ color: 'blue' }} onClick={() => handleShowTask(record)} />
                 </Space>
             ),
         },
@@ -134,20 +157,20 @@ const ListToDo = () => {
             <div>
                 <Row>
                     <Col style={{marginRight: 10, marginTop: 57}} flex={2}>
-                        <Button type="default" block icon={<DownloadOutlined />} size={size}>
+                        <Button type="default" block icon={<FileAddOutlined />} size={size} onClick={()=> navigate('/create-To-do')}>
                             Crear TO-DO
                          </Button>
                     </Col>
                 <Col flex={3}>
                     <Divider>Filtrar por estado:</Divider>
                     <Col flex={5} style={{ display: "flex", justifyContent: "space-between"}} >
-                        <Button type="default" icon={<DownloadOutlined />} size={size}>
+                        <Button type="default" icon={<UnorderedListOutlined />} size={size}>
                             Listar todas
                         </Button>
-                        <Button type="default" icon={<DownloadOutlined />} size={size}>
+                        <Button type="default" icon={<InfoCircleOutlined />} size={size}>
                             TO-DO
                         </Button>
-                        <Button type="default" icon={<DownloadOutlined />} size={size}>
+                        <Button type="default" icon={<CheckOutlined />} size={size}>
                             Completadas
                         </Button>
                     </Col>

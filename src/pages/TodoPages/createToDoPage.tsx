@@ -1,11 +1,11 @@
 import React from 'react';
-import ToDoCreate from "../../components/ToDo/ToDoCreate";
+import ToDoForm from "../../components/ToDo/ToDoForm";
 
 const CreateToDoPage = () => {
 
     return (
         <>
-            <ToDoCreate/>
+            <ToDoForm mode={"create"}/>
         </>
     )
 }

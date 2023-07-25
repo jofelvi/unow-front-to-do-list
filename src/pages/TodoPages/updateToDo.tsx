@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import ToDoForm from "../../components/ToDo/ToDoForm";
 import {useParams} from "react-router-dom";
 
-const DetailsToDo = () => {
+const UpdateToDo = () => {
     let { taskId } = useParams();
 
     useEffect(() => {
@@ -20,10 +20,9 @@ const DetailsToDo = () => {
 
     return (
         <div>
-           <h2> DetailsTodo</h2>
-
-            <ToDoForm mode={"details"} initialValues={initialValues}/>
+           <h2> Update TO-DO </h2>
+            <ToDoForm mode={"update"} initialValues={initialValues}/>
         </div>
     )
 }
-export default DetailsToDo;
+export default UpdateToDo;
