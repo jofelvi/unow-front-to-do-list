@@ -1,0 +1,1 @@
+export const urlBase = "https://localhost:7337/api"

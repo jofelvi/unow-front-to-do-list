@@ -1,89 +1,71 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Task } from '../../services/ToDo';
 
-interface Todo {
-    id: number;
-    name: string;
-    description: string;
-}
 
 interface TodoState {
     loading: boolean;
     error: string | null;
-    data: Todo[];
+    data: Task[];
+    detailToDo: Task | null,
+    toogleToDo: false
 }
 
 const initialState: TodoState = {
-    loading: false,
+    loading: true,
     error: null,
     data: [],
+    detailToDo: null,
+    toogleToDo: false
 };
 
 const todoSlice = createSlice({
     name: 'todos',
     initialState,
     reducers: {
-        fetchTodosRequest: (state) => {
-            state.loading = true;
-            state.error = null;
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
         },
-        fetchTodosSuccess: (state, action: PayloadAction<Todo[]>) => {
+        setToogleTodo: (state) => {
+            state.loading = !state.loading;
+        },
+        setError: (state, action: PayloadAction<string>) => {
+            state.loading = false;
+            state.error = action.payload;
+        },
+        fetchAllTodosSuccess: (state, action: PayloadAction<Task[]>) => {
             state.loading = false;
             state.error = null;
             state.data = action.payload;
         },
-        fetchTodosFailure: (state, action: PayloadAction<string>) => {
+        fetchByIdTodosSuccess: (state, action: PayloadAction<Task | null>) => {
             state.loading = false;
-            state.error = action.payload;
-        },
-        createTodoRequest: (state) => {
-            state.loading = true;
             state.error = null;
+            state.detailToDo = action.payload;
         },
-        createTodoSuccess: (state) => {
+        createTodoSuccess: (state, action: PayloadAction<string>) => {
             state.loading = false;
-        },
-        createTodoFailure: (state, action: PayloadAction<string>) => {
-            state.loading = false;
-            state.error = action.payload;
-        },
-        updateTodoRequest: (state) => {
-            state.loading = true;
             state.error = null;
         },
         updateTodoSuccess: (state) => {
             state.loading = false;
-        },
-        updateTodoFailure: (state, action: PayloadAction<string>) => {
-            state.loading = false;
-            state.error = action.payload;
-        },
-        deleteTodoRequest: (state) => {
-            state.loading = true;
             state.error = null;
         },
         deleteTodoSuccess: (state) => {
             state.loading = false;
-        },
-        deleteTodoFailure: (state, action: PayloadAction<string>) => {
-            state.loading = false;
-            state.error = action.payload;
+            state.error = null;
         },
     },
 });
 
 export const {
-    fetchTodosRequest,
-    fetchTodosSuccess,
-    fetchTodosFailure,
-    createTodoRequest,
+    setLoading, // Agregamos setLoading para establecer el estado de carga
+    setError,
+    fetchByIdTodosSuccess,
     createTodoSuccess,
-    createTodoFailure,
-    updateTodoRequest,
     updateTodoSuccess,
-    updateTodoFailure,
-    deleteTodoRequest,
     deleteTodoSuccess,
-    deleteTodoFailure,
+    setToogleTodo,
+    fetchAllTodosSuccess
 } = todoSlice.actions;
 
 export default todoSlice.reducer;

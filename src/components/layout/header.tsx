@@ -22,10 +22,6 @@ const Header = () => {
                 <div style={{ display: "flex", justifyContent: "center", color: "white", }}>
                     <h2>To do App</h2>
                 </div>
-                <div>
-                    <Link to="/">Lista de tareas</Link>
-                    <Link to="/"> Crear</Link>
-                </div>
             </HeaderAntd>
         </div>
     )

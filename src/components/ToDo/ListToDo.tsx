@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useReducer, useState} from 'react';
 import {Button, Col, Divider, message, Popconfirm, Row, Space, Table} from 'antd';
 import {
     CheckCircleOutlined,
@@ -16,51 +16,10 @@ import type {SizeType} from 'antd/es/config-provider/SizeContext';
 import type {ColumnsType} from 'antd/es/table';
 import type {TableRowSelection} from 'antd/es/table/interface';
 import {useNavigate} from "react-router-dom";
-
-interface DataType {
-    key: React.Key;
-    task: string;
-    description: string;
-    category: string;
-    when: Date;
-    priority: string;
-    status: string;
-    children?: DataType[];
-    id: string
-}
-
-const dataSource: DataType[] = [
-    {
-        key: '1',
-        task: 'Task 1',
-        description: 'Description 1',
-        category: 'Category 1',
-        when: new Date('2023-07-25'),
-        priority: 'High',
-        status: 'Pending',
-        id: "52332"
-    },
-    {
-        key: '2',
-        task: 'Task 2',
-        description: 'Description 2',
-        category: 'Category 2',
-        when: new Date('2023-07-25'),
-        priority: 'Medium',
-        status: 'In Progress',
-        id: "5222"
-    },
-    {
-        key: '3',
-        task: 'Task 2',
-        description: 'Description 2',
-        category: 'Category 2',
-        when: new Date('2023-07-25'),
-        priority: 'Medium',
-        status: 'Done',
-        id: "5212"
-    },
-];
+import TaskService, {Task} from "../../services/ToDo";
+import {fetchAllTodosSuccess, setLoading, setToogleTodo} from "../../store/slices/todoSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../../store";
 
 const statusIconMap: { [key: string]: React.ReactNode } = {
     Done: <CheckCircleOutlined style={{ color: 'green' }} />,
@@ -72,22 +31,36 @@ const ListToDo = () => {
     const [size, setSize] = useState<SizeType>('large');
     const [checkStrictly, setCheckStrictly] = useState(false);
     const navigate = useNavigate();
+    const taskService = new TaskService();
+    const toDo = useSelector((state: RootState) => state.toDo);
+    const { toogleToDo, data } = useSelector((state: RootState) => state.toDo);
+    const [taskData, setTaskData] = useState< Task[]>(data)
+    const [_, forceUpdate] = useReducer(x => x + 1, 0);
+    const dispatch = useDispatch();
 
-    const handleEditTask = (record: DataType) => {
+    useEffect(() => {
+
+    }, [toogleToDo, toDo]);
+    const handleEditTask = (record: Task) => {
         navigate(`update-To-do/${record.id}`)
     };
 
-    const handleShowTask = (record: DataType) => {
-        console.log('handleShowTask:', record);
+    const handleShowTask = (record: Task) => {
         navigate(`details-To-do/${record.id}`)
     };
 
-    const handleDeleteTask = (key: React.Key) => {
+    const handleDeleteTask = (key: number | undefined) => {
         console.log('Delete Task:', key);
-        message.success('Task deleted successfully');
+        let deleteTask = taskService.deleteTask(key)
+        setToogleTodo()
+        getAllTask()
+        message.success('Tarea borrada exitosamente');
     };
+    const filterTasksByStatus =(tasks: any[], status: any)=> {
+        return tasks.filter((task) => task.status === status);
+    }
 
-    const rowSelection: TableRowSelection<DataType> = {
+    const rowSelection: TableRowSelection<Task> = {
         onChange: (selectedRowKeys, selectedRows) => {
             console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         },
@@ -99,29 +72,42 @@ const ListToDo = () => {
         },
     };
 
-    const columns: ColumnsType<DataType> = [
+    const completedTasks = ()=>{
+       let filterData =  filterTasksByStatus(data, true)
+       setTaskData(filterData)
+    }
+    const pendingTasks  = ()=>{
+       let filterData =  filterTasksByStatus(data, false)
+       setTaskData(filterData)
+    }
+    const getAllTask = async () => {
+        let task = await taskService.getAllTasks();
+        dispatch(fetchAllTodosSuccess(task));
+        dispatch(setLoading(false));
+    };
+    const listAllTask  = ()=>{
+        getAllTask()
+        setTaskData(data)
+    }
+
+    const columns: ColumnsType<Task> = [
         {
-            title: 'Task',
-            dataIndex: 'task',
+            title: 'Titulo',
+            dataIndex: 'title',
             key: 'task',
         },
         {
-            title: 'Description',
+            title: 'Descripcion',
             dataIndex: 'description',
             key: 'description',
         },
         {
-            title: 'Category',
+            title: 'Categoria',
             dataIndex: 'category',
             key: 'category',
         },
         {
-            title: 'When',
-            dataIndex: 'when',
-            key: 'when',
-        },
-        {
-            title: 'Priority',
+            title: 'Prioridad',
             dataIndex: 'priority',
             key: 'priority',
         },
@@ -129,7 +115,7 @@ const ListToDo = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (status: string) => statusIconMap[status],
+            render: (status: boolean) => (status ? <CheckCircleOutlined style={{ color: 'green' }} /> : <CloseCircleOutlined style={{ color: 'red' }} />)
         },
         {
             title: 'Actions',
@@ -138,10 +124,10 @@ const ListToDo = () => {
                 <Space size="middle">
                     <EditOutlined style={{ color: 'blue' }} onClick={() => handleEditTask(record)} />
                     <Popconfirm
-                        title="Are you sure to delete this task?"
-                        onConfirm={() => handleDeleteTask(record.key)}
+                        title="¿Esta seguro que desea borrar esta tarea?"
+                        onConfirm={() => handleDeleteTask(record.id)}
                         onCancel={() => message.error('Cancelled')}
-                        okText="Yes"
+                        okText="Si"
                         cancelText="No"
                     >
                         <DeleteOutlined style={{ color: 'red' }} />
@@ -164,13 +150,16 @@ const ListToDo = () => {
                 <Col flex={3}>
                     <Divider>Filtrar por estado:</Divider>
                     <Col flex={5} style={{ display: "flex", justifyContent: "space-between"}} >
-                        <Button type="default" icon={<UnorderedListOutlined />} size={size}>
-                            Listar todas
+                        <Button onClick={()=> listAllTask()} type="default" icon={<UnorderedListOutlined />} size={size}>
+                            Actualizar
                         </Button>
-                        <Button type="default" icon={<InfoCircleOutlined />} size={size}>
+                        <Button onClick={()=> listAllTask()} type="default" icon={<UnorderedListOutlined />} size={size}>
+                            Quitar Filtros
+                        </Button>
+                        <Button onClick={()=> pendingTasks()} type="default" icon={<InfoCircleOutlined />} size={size}>
                             TO-DO
                         </Button>
-                        <Button type="default" icon={<CheckOutlined />} size={size}>
+                        <Button onClick={()=> completedTasks()} type="default" icon={<CheckOutlined />} size={size}>
                             Completadas
                         </Button>
                     </Col>
@@ -178,7 +167,7 @@ const ListToDo = () => {
             </Row>
                 <Table
                     style={{marginTop: 20}}
-                    dataSource={dataSource}
+                    dataSource={taskData}
                     columns={columns}
                     rowSelection={{ ...rowSelection, checkStrictly }}
                 />;

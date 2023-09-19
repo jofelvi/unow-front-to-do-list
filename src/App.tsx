@@ -1,11 +1,11 @@
 import React from 'react';
 import Layout from "./components/layout/layout";
 import { Routes, Route } from "react-router-dom";
-import CreateToDo from "./pages/TodoPages/createToDoPage";
-import DetailsToDo from "./pages/TodoPages/detailsToDo";
-import ListToDoPage from "./pages/TodoPages/listToDoPage";
-import NotFound from "./pages/notFountPage/NotFound";
-import UpdateToDo from "./pages/TodoPages/updateToDo";
+import CreateToDo from "./views/TodoPages/createToDoPage";
+import DetailsToDo from "./views/TodoPages/detailsToDo";
+import ListToDoPage from "./views/TodoPages/listToDoPage";
+import NotFound from "./views/notFountPage/NotFound";
+import UpdateToDo from "./views/TodoPages/updateToDo";
 
 function App() {
 
